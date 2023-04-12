@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="5dp">
+
+    <RelativeLayout
+        android:id="@+id/rl_bot"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="48dp"
+        android:visibility="visible">
+
+        <ImageView
+            android:id="@+id/iv_icon_bot"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/icon_bot" />
+
+        <TextView
+            android:id="@+id/tv_msg_bot"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:layout_toEndOf="@+id/iv_icon_bot"
+            android:background="@drawable/bg_bot_msg"
+            android:padding="8dp"
+            android:text="正在思考中..."
+            android:textColor="@color/white"
+            android:textSize="16sp" />
+
+
+    </RelativeLayout>
+
+    <ProgressBar
+        android:id="@+id/pb_think"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_marginStart="160dp"
+        android:layout_marginTop="10dp"
+        android:indeterminate="true" />
+
+    <RelativeLayout
+        android:id="@+id/rl_human"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="48dp"
+        android:visibility="gone">
+
+
+        <TextView
+            android:id="@+id/tv_msg_human"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="6dp"
+            android:layout_marginEnd="48dp"
+            android:background="@drawable/bg_human_msg"
+            android:padding="8dp"
+            android:text="你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好"
+            android:textColor="@color/white"
+            android:textSize="16sp" />
+
+        <ImageView
+            android:id="@+id/iv_icon_human"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_alignParentRight="true"
+            android:src="@drawable/icon_girl" />
+    </RelativeLayout>
+
+</RelativeLayout>
