@@ -27,6 +27,7 @@
             android:padding="8dp"
             android:text="正在思考中..."
             android:textColor="@color/white"
+            android:textIsSelectable="true"
             android:textSize="16sp" />
 
 
@@ -59,6 +60,7 @@
             android:padding="8dp"
             android:text="你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好"
             android:textColor="@color/white"
+            android:textIsSelectable="true"
             android:textSize="16sp" />
 
         <ImageView
