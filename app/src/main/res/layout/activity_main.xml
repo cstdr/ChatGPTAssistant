@@ -11,12 +11,13 @@
         android:id="@+id/rv_chatlist"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/rl_send" />
+        android:layout_above="@+id/rl_send"
+        android:layout_marginBottom="20dp" />
 
     <RelativeLayout
         android:id="@+id/rl_send"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="48dp"
         android:layout_alignParentBottom="true"
         android:padding="1dp">
 
@@ -27,14 +28,15 @@
             android:layout_marginEnd="4dp"
             android:layout_toLeftOf="@+id/btn_send"
             android:background="@drawable/bg_rounded_corner"
-            android:hint="在这里输入你的问题"
+            android:hint="在这里跟我聊任何内容"
             android:padding="8dp"
             android:textColor="@color/black"
-            android:textSize="14sp" />
+            android:textColorHint="@color/black_65"
+            android:textSize="16sp" />
 
         <Button
             android:id="@+id/btn_send"
-            android:layout_width="40dp"
+            android:layout_width="48dp"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
