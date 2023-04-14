@@ -6,9 +6,23 @@ public class Constant {
 
     // 2023年4月12日 by shamu
 //    public static final String API = "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";
-    public static final String API = "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";
+    /**
+     * To use our hosted ChatGPT API, you can use the following steps:
+     * 要使用我们托管的 ChatGPT API，您可以使用以下步骤：
+     * Join our Discord server.
+     * 加入我们的服务器。
+     * Get your API key from the #Bot channel by sending /key command.
+     * 通过发送 /key 命令从 #Bot 通道获取 API 密钥。
+     * Use the API Key in your requests to the following endpoints.
+     */
+    public static final String API = "pk-YVVWnOckxnJxxWacYGhPJMLLFPhNpTVLCFTmcrAeOrrpHWCL";
 
-    public static final String URL = "https://api.openai.com/v1/chat/completions";
+    /**
+     * https://github.com/PawanOsman/ChatGPT#chat-completion-chatgpt
+     */
+    public static final String URL = "https://api.pawan.krd/v1/chat/completions";
+    public static final String OPENAI_URL = "https://api.openai.com/v1/chat/completions";
+
     public static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
     public static final String AUTHORIZATION = "Authorization";
     public static final String AUTHORIZATION_API_KEY = "Bearer " + API;

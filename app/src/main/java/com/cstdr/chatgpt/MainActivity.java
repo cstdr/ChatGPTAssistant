@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
     private List<ChatMessage> mChatMessageList;
     private ChatListAdapter mListAdapter;
 
-    public OkHttpClient client = new OkHttpClient.Builder().connectTimeout(10000, TimeUnit.SECONDS).readTimeout(10000, TimeUnit.SECONDS).build();
+    public OkHttpClient client = new OkHttpClient.Builder().connectTimeout(120, TimeUnit.SECONDS).readTimeout(120, TimeUnit.SECONDS).build();
 
 
     @Override
