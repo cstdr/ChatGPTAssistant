@@ -14,12 +14,7 @@ a Chat APP by ChatGPT API.
 
 - 免费的话，语音听写和在线语音合成一年5万次交互量。
 
-2. 微软Azure（https://azure.microsoft.com/zh-cn/products/cognitive-services/speech-services/）
-
-- 免费版本：每月 5 小时免费音频，永久免费。
-- 注册需要VISA卡。
-
-3. 百度云、阿里云、腾讯云等云平台提供的功能
+2. 百度云、阿里云、腾讯云等云平台提供的功能
 
 
 
@@ -36,3 +31,10 @@ a Chat APP by ChatGPT API.
 优点：离线语音识别，网上教程多。
 
 缺点：集成有点复杂，并且没有个性化语音功能，很多教程都比较久远，维护难度大。
+
+3. 微软Azure（https://azure.microsoft.com/zh-cn/products/cognitive-services/speech-services/）
+
+- 免费版本：每月 5 小时免费音频，永久免费。
+- 注册需要VISA卡。
+最后卡在VISA注册上，卡激活没问题，持卡人签名那边尝试各种办法怎么都过不去。。。
+
