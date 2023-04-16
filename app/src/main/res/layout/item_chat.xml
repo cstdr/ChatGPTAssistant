@@ -30,8 +30,8 @@
             android:textIsSelectable="true"
             android:textSize="16sp" />
 
-
     </RelativeLayout>
+
 
     <ProgressBar
         android:id="@+id/pb_think"
@@ -40,6 +40,16 @@
         android:layout_marginStart="160dp"
         android:layout_marginTop="10dp"
         android:indeterminate="true" />
+
+    <ImageView
+        android:id="@+id/iv_icon_copy"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="16dp"
+        android:src="@drawable/icon_copy"
+        android:visibility="gone" />
 
     <RelativeLayout
         android:id="@+id/rl_human"
@@ -69,6 +79,7 @@
             android:layout_height="48dp"
             android:layout_alignParentRight="true"
             android:src="@drawable/icon_girl" />
+
     </RelativeLayout>
 
 </RelativeLayout>

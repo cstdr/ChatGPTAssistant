@@ -4,16 +4,20 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.cstdr.chatgpt.MyApplication;
 import com.cstdr.chatgpt.R;
 import com.cstdr.chatgpt.bean.ChatMessage;
 import com.cstdr.chatgpt.constant.Constant;
+import com.cstdr.chatgpt.util.ClipboardUtil;
 
 import java.util.List;
 import java.util.zip.Inflater;
@@ -45,16 +49,28 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.MyView
             holder.mRlHuman.setVisibility(View.GONE);
             holder.mRlBot.setVisibility(View.VISIBLE);
             holder.mTvMsgBot.setText(msg);
+            holder.mIvCopy.setVisibility(View.VISIBLE);
+            holder.mIvCopy.setOnClickListener(v -> {
+                // 复制到剪贴板
+                if (ClipboardUtil.copy(msg)) {
+                    Toast.makeText(v.getContext(), "已复制", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(v.getContext(), "复制出错", Toast.LENGTH_SHORT).show();
+                }
+            });
+
         } else if (owner.equals(Constant.OWNER_HUMAN)) {
             holder.mPbThink.setVisibility(View.GONE);
             holder.mRlBot.setVisibility(View.GONE);
             holder.mRlHuman.setVisibility(View.VISIBLE);
             holder.mTvMsgHuman.setText(msg);
+            holder.mIvCopy.setVisibility(View.GONE);
         } else if (owner.equals(Constant.OWNER_BOT_THINK)) {
             holder.mPbThink.setVisibility(View.VISIBLE);
             holder.mRlHuman.setVisibility(View.GONE);
             holder.mRlBot.setVisibility(View.VISIBLE);
             holder.mTvMsgBot.setText(msg);
+            holder.mIvCopy.setVisibility(View.GONE);
         }
     }
 
@@ -74,6 +90,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.MyView
         private TextView mTvMsgBot;
         private TextView mTvMsgHuman;
         private ProgressBar mPbThink;
+        private ImageView mIvCopy;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -85,6 +102,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.MyView
             mTvMsgHuman = itemView.findViewById(R.id.tv_msg_human);
 
             mPbThink = itemView.findViewById(R.id.pb_think);
+            mIvCopy = itemView.findViewById(R.id.iv_icon_copy);
         }
     }
 

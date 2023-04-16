@@ -25,6 +25,7 @@ import android.widget.Toast;
 import com.cstdr.chatgpt.adapter.ChatListAdapter;
 import com.cstdr.chatgpt.bean.ChatMessage;
 import com.cstdr.chatgpt.constant.Constant;
+import com.cstdr.chatgpt.util.ClipboardUtil;
 import com.cstdr.chatgpt.util.JsonParser;
 import com.iflytek.cloud.ErrorCode;
 import com.iflytek.cloud.InitListener;
@@ -106,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ClipboardUtil.init(this);
 
         // 将“12345678”替换成您申请的APPID，申请地址：http://www.xfyun.cn
         // 请勿在“=”与appid之间添加任何空字符或者转义符
@@ -120,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
 
         // ======================
 
-        Speech.init(this, getPackageName());
+//        Speech.init(this, getPackageName());
 
         mContext = this;
 
@@ -345,7 +347,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Speech.getInstance().shutdown();
+//        Speech.getInstance().shutdown();
         if (mIatDialog != null) {
             // 退出时释放连接
             mIatDialog.cancel();
@@ -472,6 +474,9 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * @deprecated 谷歌的语音组件，需要科技才能用
+     */
     private void startRecord() {
         try {
             Speech.getInstance().startListening(mSPVRecord, new SpeechDelegate() {
