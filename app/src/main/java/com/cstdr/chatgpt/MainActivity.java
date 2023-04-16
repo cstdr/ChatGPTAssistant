@@ -19,6 +19,7 @@ import android.util.TimeUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -82,6 +83,8 @@ public class MainActivity extends AppCompatActivity {
     public OkHttpClient client = new OkHttpClient.Builder().connectTimeout(120, TimeUnit.SECONDS).readTimeout(120, TimeUnit.SECONDS).build();
     private SpeechProgressView mSPVRecord;
     private LinearLayout mLlRecord;
+
+    private Button mBtnStopSpeech;
 
     // ===============科大讯飞语音转写相关===================
 
@@ -310,7 +313,7 @@ public class MainActivity extends AppCompatActivity {
     private SynthesizerListener mTtsListener = new SynthesizerListener() {
         @Override
         public void onSpeakBegin() {
-
+            mBtnStopSpeech.setVisibility(View.VISIBLE);
         }
 
         @Override
@@ -335,7 +338,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onCompleted(SpeechError speechError) {
-
+            mBtnStopSpeech.setVisibility(View.GONE);
         }
 
         @Override
@@ -390,6 +393,13 @@ public class MainActivity extends AppCompatActivity {
         });
 
         mIatDialog = new RecognizerDialog(this, mInitListener);
+
+        mBtnStopSpeech = findViewById(R.id.btn_icon_stop_speech);
+        mBtnStopSpeech.setOnClickListener(v -> {
+            mTts.pauseSpeaking();
+            mTts.stopSpeaking();
+            mBtnStopSpeech.setVisibility(View.GONE);
+        });
     }
 
     /**

@@ -49,7 +49,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.MyView
             holder.mRlHuman.setVisibility(View.GONE);
             holder.mRlBot.setVisibility(View.VISIBLE);
             holder.mTvMsgBot.setText(msg);
-            holder.mIvCopy.setVisibility(View.VISIBLE);
+
+            // TODO 复制去掉
+            holder.mIvCopy.setVisibility(View.GONE);
             holder.mIvCopy.setOnClickListener(v -> {
                 // 复制到剪贴板
                 if (ClipboardUtil.copy(msg)) {

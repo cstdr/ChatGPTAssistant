@@ -7,6 +7,16 @@
     android:padding="16dp"
     tools:context=".MainActivity">
 
+    <Button
+        android:id="@+id/btn_icon_stop_speech"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_above="@+id/rl_send"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/icon_stop_speech"
+        android:visibility="visible" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_chatlist"
         android:layout_width="match_parent"
