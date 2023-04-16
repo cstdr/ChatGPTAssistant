@@ -2,21 +2,38 @@ package com.cstdr.chatgpt;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.speech.tts.Voice;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.TimeUtils;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.cstdr.chatgpt.adapter.ChatListAdapter;
 import com.cstdr.chatgpt.bean.ChatMessage;
 import com.cstdr.chatgpt.constant.Constant;
+import com.iflytek.cloud.SpeechConstant;
+import com.iflytek.cloud.SpeechUtility;
+
+import net.gotev.speech.GoogleVoiceTypingDisabledException;
+import net.gotev.speech.Speech;
+import net.gotev.speech.SpeechDelegate;
+import net.gotev.speech.SpeechRecognitionNotAvailable;
+import net.gotev.speech.TextToSpeechCallback;
+import net.gotev.speech.ui.SpeechProgressView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -43,10 +60,14 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView mRvChatList;
     private EditText mEtQuestion;
     private Button mBtnSend;
+    private Button mBtnRecord;
+
     private List<ChatMessage> mChatMessageList;
     private ChatListAdapter mListAdapter;
 
     public OkHttpClient client = new OkHttpClient.Builder().connectTimeout(120, TimeUnit.SECONDS).readTimeout(120, TimeUnit.SECONDS).build();
+    private SpeechProgressView mSPVRecord;
+    private LinearLayout mLlRecord;
 
 
     @Override
@@ -54,14 +75,93 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Speech.init(this, getPackageName());
+
         mContext = this;
 
         initView();
         initChatMessageList();
         initAdpater();
 
-        addChatMessage(Constant.OWNER_BOT, "欢迎和我聊天，我是蔡特鸡皮踢");
-        addChatMessage(Constant.OWNER_BOT, "你可以让我讲个冷笑话hhh🤣");
+        initWelcomeContent();
+
+    }
+
+    private void initWelcomeContent() {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        String owner = Constant.OWNER_BOT;
+                        String question = "欢迎和我聊天，我是蔡特鸡皮踢";
+
+                        ChatMessage chatMessage = new ChatMessage(owner, question);
+                        mChatMessageList.add(chatMessage);
+                        mListAdapter.notifyDataSetChanged();
+                        mRvChatList.smoothScrollToPosition(mListAdapter.getItemCount());
+
+                        Speech.getInstance().say(question, new TextToSpeechCallback() {
+                            @Override
+                            public void onStart() {
+
+                            }
+
+                            @Override
+                            public void onCompleted() {
+                                while (true) {
+                                    try {
+                                        Thread.sleep(1000);
+                                    } catch (InterruptedException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                    if (!Speech.getInstance().isSpeaking()) {
+                                        String owner = Constant.OWNER_BOT;
+                                        String question = "你可以让我讲一个冷笑话🤣";
+
+                                        ChatMessage chatMessage = new ChatMessage(owner, question);
+                                        mChatMessageList.add(chatMessage);
+                                        mListAdapter.notifyDataSetChanged();
+                                        mRvChatList.smoothScrollToPosition(mListAdapter.getItemCount());
+                                        Speech.getInstance().say(question, new TextToSpeechCallback() {
+                                            @Override
+                                            public void onStart() {
+
+                                            }
+
+                                            @Override
+                                            public void onCompleted() {
+
+                                            }
+
+                                            @Override
+                                            public void onError() {
+
+                                            }
+                                        });
+
+                                        break;
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onError() {
+
+                            }
+                        });
+                    }
+                });
+
+            }
+        }, 1000);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Speech.getInstance().shutdown();
     }
 
     private void initChatMessageList() {
@@ -85,6 +185,57 @@ public class MainActivity extends AppCompatActivity {
         });
 
         mRvChatList = findViewById(R.id.rv_chatlist);
+
+        mLlRecord = findViewById(R.id.ll_record);
+        mSPVRecord = findViewById(R.id.spv_record);
+        mBtnRecord = findViewById(R.id.btn_record);
+        mBtnRecord.setOnClickListener((v) -> {
+            requestPermissions();
+        });
+    }
+
+    private void requestPermissions() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, 1);
+        } else {
+            mLlRecord.setVisibility(View.VISIBLE);
+            startRecord();
+        }
+    }
+
+    private void startRecord() {
+        try {
+            Speech.getInstance().startListening(mSPVRecord, new SpeechDelegate() {
+                @Override
+                public void onStartOfSpeech() {
+
+                }
+
+                @Override
+                public void onSpeechRmsChanged(float value) {
+
+                }
+
+                @Override
+                public void onSpeechPartialResults(List<String> results) {
+
+                }
+
+                @Override
+                public void onSpeechResult(String result) {
+                    mLlRecord.setVisibility(View.GONE);
+                    Log.d(TAG, "onSpeechResult: === " + result);
+                    if (!TextUtils.isEmpty(result)) {
+                        mEtQuestion.setText(result.trim());
+                        mBtnSend.performClick();
+                    }
+                }
+            });
+        } catch (SpeechRecognitionNotAvailable e) {
+            throw new RuntimeException(e);
+        } catch (GoogleVoiceTypingDisabledException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void sendQuestion() {
@@ -113,6 +264,25 @@ public class MainActivity extends AppCompatActivity {
                 mChatMessageList.add(chatMessage);
                 mListAdapter.notifyDataSetChanged();
                 mRvChatList.smoothScrollToPosition(mListAdapter.getItemCount());
+
+                if (owner.equals(Constant.OWNER_BOT)) {
+                    Speech.getInstance().say(question, new TextToSpeechCallback() {
+                        @Override
+                        public void onStart() {
+
+                        }
+
+                        @Override
+                        public void onCompleted() {
+
+                        }
+
+                        @Override
+                        public void onError() {
+
+                        }
+                    });
+                }
             }
         });
     }

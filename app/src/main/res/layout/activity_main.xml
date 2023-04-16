@@ -14,6 +14,28 @@
         android:layout_above="@+id/rl_send"
         android:layout_marginBottom="20dp" />
 
+    <LinearLayout
+        android:id="@+id/ll_record"
+        android:layout_width="160dp"
+        android:layout_height="200dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/bg_rounded_corner"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <net.gotev.speech.ui.SpeechProgressView
+            android:id="@+id/spv_record"
+            android:layout_width="120dp"
+            android:layout_height="150dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="正在录音中..."
+            android:textColor="@color/blue_500" />
+    </LinearLayout>
+
     <RelativeLayout
         android:id="@+id/rl_send"
         android:layout_width="match_parent"
@@ -21,12 +43,21 @@
         android:layout_alignParentBottom="true"
         android:padding="1dp">
 
+        <Button
+            android:id="@+id/btn_record"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/icon_record"
+            android:text="" />
+
         <EditText
             android:id="@+id/et_question"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_marginStart="4dp"
             android:layout_marginEnd="4dp"
             android:layout_toLeftOf="@+id/btn_send"
+            android:layout_toRightOf="@+id/btn_record"
             android:background="@drawable/bg_rounded_corner"
             android:hint="在这里跟我聊任何内容"
             android:padding="8dp"
