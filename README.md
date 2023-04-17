@@ -1,6 +1,4 @@
 # ChatGPT
-a Chat APP by ChatGPT API.
-
 一个基于 ChatGPT API 、不需要使用科技的Android 语音助手（暂时这个需求方向）。
 
 ## 功能
@@ -9,9 +7,10 @@ a Chat APP by ChatGPT API.
 3. 支持上下文理解，可以多轮对话，比如扮演面试官角色进行面试沟通。
 
 ## 下载
-[点击这里](https://github.com/cstdr/ChatGPTAssistant/blob/main/app/release/app-release.apk?raw=true)
-![](https://github.com/cstdr/ChatGPTAssistant/blob/main/%E6%88%AA%E5%9B%BE/1.pic.jpg?raw=true)
-![](https://github.com/cstdr/ChatGPTAssistant/blob/main/%E6%88%AA%E5%9B%BE/2.pic.jpg?raw=true)
+
+👋[点击这里](https://github.com/cstdr/ChatGPTAssistant/blob/main/app/release/app-release.apk?raw=true)
+
+<img src="https://github.com/cstdr/ChatGPTAssistant/blob/main/%E6%88%AA%E5%9B%BE/1.pic.jpg?raw=true" width="30%" height="30%"><img src="https://github.com/cstdr/ChatGPTAssistant/blob/main/%E6%88%AA%E5%9B%BE/2.pic.jpg?raw=true" width="30%" height="30%">
 
 
 
