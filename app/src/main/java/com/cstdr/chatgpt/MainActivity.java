@@ -83,8 +83,10 @@ public class MainActivity extends AppCompatActivity {
     public OkHttpClient client = new OkHttpClient.Builder().connectTimeout(120, TimeUnit.SECONDS).readTimeout(120, TimeUnit.SECONDS).build();
     private SpeechProgressView mSPVRecord;
     private LinearLayout mLlRecord;
-
     private Button mBtnStopSpeech;
+
+    private JSONArray mMessagesArray = new JSONArray();
+
 
     // ===============科大讯飞语音转写相关===================
 
@@ -553,6 +555,16 @@ public class MainActivity extends AppCompatActivity {
 
                     speechStartSaying(question);
 
+                    // TODO put bot message
+                    JSONObject message = new JSONObject();
+                    try {
+                        message.put(Constant.MESSAGES_KEY_ROLE, Constant.MESSAGES_VALUE_ROLE_ASSISTANT);
+                        message.put(Constant.MESSAGES_KEY_CONTENT, question);
+                    } catch (JSONException e) {
+                        throw new RuntimeException(e);
+                    }
+                    mMessagesArray.put(message);
+
 //                    Speech.getInstance().say(question, new TextToSpeechCallback() {
 //                        @Override
 //                        public void onStart() {
@@ -582,24 +594,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void sendQuestionToAPI(String question) {
 
-        // JSONObject
-        JSONObject jsonBody = new JSONObject();
-        try {
-            jsonBody.put(Constant.MODEL, Constant.MODEL_GPT35);
-            jsonBody.put(Constant.TEMPERATURE, Constant.TEMPERATURE_MIDDLE);
-
-            // put message
-            JSONObject message = new JSONObject();
-            message.put(Constant.MESSAGES_KEY_ROLE, Constant.MESSAGES_VALUE_ROLE_USER);
-            message.put(Constant.MESSAGES_KEY_CONTENT, question);
-
-            JSONArray messagesArray = new JSONArray();
-            messagesArray.put(message);
-
-            jsonBody.put(Constant.MESSAGES, messagesArray);
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
+        JSONObject jsonBody = setRequestParam(question);
 
         // Request
         RequestBody requestBody = RequestBody.create(jsonBody.toString(), Constant.JSON);
@@ -635,5 +630,31 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    private JSONObject setRequestParam(String question) {
+        // JSONObject
+        JSONObject jsonBody = new JSONObject();
+        try {
+            jsonBody.put(Constant.MODEL, Constant.MODEL_GPT35);
+            jsonBody.put(Constant.TEMPERATURE, Constant.TEMPERATURE_MIDDLE);
+
+
+            if (mMessagesArray.length() > 8) {
+                mMessagesArray.remove(0);
+            }
+
+            // TODO put user message
+            JSONObject message = new JSONObject();
+            message.put(Constant.MESSAGES_KEY_ROLE, Constant.MESSAGES_VALUE_ROLE_USER);
+            message.put(Constant.MESSAGES_KEY_CONTENT, question);
+
+            mMessagesArray.put(message);
+
+            jsonBody.put(Constant.MESSAGES, mMessagesArray);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+        return jsonBody;
     }
 }
