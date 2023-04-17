@@ -10,6 +10,10 @@ a Chat APP by ChatGPT API.
 
 ## 下载
 [点击这里](https://github.com/cstdr/ChatGPTAssistant/blob/main/app/release/app-release.apk?raw=true)
+![](https://github.com/cstdr/ChatGPTAssistant/blob/main/%E6%88%AA%E5%9B%BE/1.pic.jpg?raw=true)
+![](https://github.com/cstdr/ChatGPTAssistant/blob/main/%E6%88%AA%E5%9B%BE/2.pic.jpg?raw=true)
+
+
 
 # 技术点
 
