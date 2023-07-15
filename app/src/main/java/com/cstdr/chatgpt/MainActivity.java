@@ -1,27 +1,24 @@
 package com.cstdr.chatgpt;
 
+import android.Manifest;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.os.Bundle;
+import android.os.Handler;
+import android.text.TextUtils;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import android.Manifest;
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.os.Bundle;
-import android.os.Handler;
-import android.speech.tts.Voice;
-import android.text.TextUtils;
-import android.util.Log;
-import android.util.TimeUtils;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import com.cstdr.chatgpt.adapter.ChatListAdapter;
 import com.cstdr.chatgpt.bean.ChatMessage;
@@ -33,7 +30,6 @@ import com.iflytek.cloud.InitListener;
 import com.iflytek.cloud.RecognizerResult;
 import com.iflytek.cloud.SpeechConstant;
 import com.iflytek.cloud.SpeechError;
-import com.iflytek.cloud.SpeechRecognizer;
 import com.iflytek.cloud.SpeechSynthesizer;
 import com.iflytek.cloud.SpeechUtility;
 import com.iflytek.cloud.SynthesizerListener;
@@ -44,7 +40,6 @@ import net.gotev.speech.GoogleVoiceTypingDisabledException;
 import net.gotev.speech.Speech;
 import net.gotev.speech.SpeechDelegate;
 import net.gotev.speech.SpeechRecognitionNotAvailable;
-import net.gotev.speech.TextToSpeechCallback;
 import net.gotev.speech.ui.SpeechProgressView;
 
 import org.json.JSONArray;
@@ -80,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
     private List<ChatMessage> mChatMessageList;
     private ChatListAdapter mListAdapter;
 
-    public OkHttpClient client = new OkHttpClient.Builder().connectTimeout(120, TimeUnit.SECONDS).readTimeout(120, TimeUnit.SECONDS).build();
+    public OkHttpClient client;
     private SpeechProgressView mSPVRecord;
     private LinearLayout mLlRecord;
     private Button mBtnStopSpeech;
@@ -101,9 +96,10 @@ public class MainActivity extends AppCompatActivity {
 
     // ===============科大讯飞语音合成相关===================
     /**
-     * 有效期 2023-05-01
+     * 可以去官网找自己喜欢的声音
+     * https://console.xfyun.cn/services/tts
      */
-    private String voicer = "x4_lingxiaolu_en";
+    private String voicer = "aisxping";
     private SpeechSynthesizer mTts;
     private File pcmFile;
 
@@ -598,7 +594,22 @@ public class MainActivity extends AppCompatActivity {
 
         // Request
         RequestBody requestBody = RequestBody.create(jsonBody.toString(), Constant.JSON);
-        Request request = new Request.Builder().url(Constant.URL).header(Constant.AUTHORIZATION, Constant.AUTHORIZATION_API_KEY).post(requestBody).build();
+        Request request = new Request.Builder().url(Constant.OPENAI_URL).header(Constant.AUTHORIZATION, Constant.AUTHORIZATION_API_KEY).post(requestBody).build();
+
+        OkHttpClient.Builder builder = new OkHttpClient.Builder();
+        builder.connectTimeout(120, TimeUnit.SECONDS).readTimeout(120, TimeUnit.SECONDS);
+        // TODO 代理ip
+//        builder.proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(Constant.PROXY_HOST_NAME, Constant.PROXY_PORT)));
+//        builder.proxyAuthenticator(new Authenticator() {
+//            @Nullable
+//            @Override
+//            public Request authenticate(@Nullable Route route, @NonNull Response response) throws IOException {
+//                String basic = Credentials.basic(Constant.PROXY_USER_NAME, Constant.PROXY_PASSWORD);
+//                return response.request().newBuilder().header("Proxy-Authorization", basic).build();
+//            }
+//        });
+
+        client = builder.build();
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
