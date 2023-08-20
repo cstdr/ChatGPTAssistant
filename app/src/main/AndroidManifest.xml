@@ -36,7 +36,7 @@
         android:theme="@style/Theme.ChatGPT"
         tools:targetApi="31">
         <activity
-            android:name=".controller.MainActivity"
+            android:name=".controller.ChatListActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

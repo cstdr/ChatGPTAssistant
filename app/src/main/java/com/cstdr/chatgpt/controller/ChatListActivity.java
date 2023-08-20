@@ -27,17 +27,14 @@ import com.cstdr.chatgpt.model.Constant;
 import com.cstdr.chatgpt.model.IChatMessageData;
 import com.cstdr.chatgpt.model.IJSONMessage;
 import com.cstdr.chatgpt.model.JSONMessage;
+import com.cstdr.chatgpt.model.xfyun.IXFSpeech;
+import com.cstdr.chatgpt.model.xfyun.XFSpeech;
 import com.cstdr.chatgpt.util.ClipboardUtil;
-import com.cstdr.chatgpt.util.JsonParser;
 import com.iflytek.cloud.ErrorCode;
 import com.iflytek.cloud.InitListener;
 import com.iflytek.cloud.RecognizerResult;
-import com.iflytek.cloud.SpeechConstant;
 import com.iflytek.cloud.SpeechError;
-import com.iflytek.cloud.SpeechSynthesizer;
-import com.iflytek.cloud.SpeechUtility;
 import com.iflytek.cloud.SynthesizerListener;
-import com.iflytek.cloud.ui.RecognizerDialog;
 import com.iflytek.cloud.ui.RecognizerDialogListener;
 
 import net.gotev.speech.GoogleVoiceTypingDisabledException;
@@ -50,10 +47,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -64,48 +58,25 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class MainActivity extends AppCompatActivity {
+public class ChatListActivity extends AppCompatActivity {
 
-    private static final String TAG = MainActivity.class.getSimpleName();
+    private static final String TAG = ChatListActivity.class.getSimpleName();
 
     private Context mContext;
-
-    // Model层
-    private IChatMessageData mChatMessageData;
-    private IJSONMessage mJSONMessage;
-
     private RecyclerView mRvChatList;
     private EditText mEtQuestion;
     private Button mBtnSend;
     private Button mBtnRecord;
-
     private ChatListAdapter mListAdapter;
-
     public OkHttpClient client;
     private SpeechProgressView mSPVRecord;
     private LinearLayout mLlRecord;
     private Button mBtnStopSpeech;
 
-    // ===============科大讯飞语音转写相关===================
-
-    // 语音听写UI
-    private RecognizerDialog mIatDialog;
-    // 引擎类型
-    private String mEngineType = SpeechConstant.TYPE_CLOUD;
-    private String resultType = "json";
-    private String language = "zh_cn";
-    // 用HashMap存储听写结果
-    private HashMap<String, String> mIatResults = new LinkedHashMap<>();
-
-    // ===============科大讯飞语音合成相关===================
-    /**
-     * 可以去官网找自己喜欢的声音
-     * https://console.xfyun.cn/services/tts
-     */
-    private String voicer = "aisxping";
-    private SpeechSynthesizer mTts;
-    private File pcmFile;
-
+    // Model层
+    private IChatMessageData mChatMessageData;
+    private IJSONMessage mJSONMessage;
+    private IXFSpeech mXFSpeech;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,16 +84,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ClipboardUtil.init();
 
-        // 将“12345678”替换成您申请的APPID，申请地址：http://www.xfyun.cn
-        // 请勿在“=”与appid之间添加任何空字符或者转义符
-        SpeechUtility.createUtility(this, SpeechConstant.APPID + "=febcf088");
-
-        // 初始化识别无UI识别对象
-        // 使用SpeechRecognizer对象，可根据回调消息自定义界面；
-//        mIat = SpeechRecognizer.createRecognizer(this, mInitListener);
-
-        mTts = SpeechSynthesizer.createSynthesizer(this, mInitListener);
-
+        mXFSpeech = new XFSpeech(this, mInitListener);
 
         // ======================
 
@@ -136,85 +98,6 @@ public class MainActivity extends AppCompatActivity {
         initWelcomeContent();
     }
 
-    /**
-     * 语音识别参数设置
-     *
-     * @return
-     */
-    public void setRecognizerParam() {
-        // 清空参数
-        mIatDialog.setParameter(SpeechConstant.PARAMS, null);
-        // 设置听写引擎
-        mIatDialog.setParameter(SpeechConstant.ENGINE_TYPE, mEngineType);
-        // 设置返回结果格式
-        mIatDialog.setParameter(SpeechConstant.RESULT_TYPE, resultType);
-
-        if (language.equals("zh_cn")) {
-            String lag = "mandarin";
-            // 设置语言
-            Log.e(TAG, "language = " + language);
-            mIatDialog.setParameter(SpeechConstant.LANGUAGE, "zh_cn");
-            // 设置语言区域
-            mIatDialog.setParameter(SpeechConstant.ACCENT, lag);
-        } else {
-            mIatDialog.setParameter(SpeechConstant.LANGUAGE, language);
-        }
-
-        //此处用于设置dialog中不显示错误码信息
-        //mIatDialog.setParameter("view_tips_plain","false");
-
-        // 设置语音前端点:静音超时时间，即用户多长时间不说话则当做超时处理
-        mIatDialog.setParameter(SpeechConstant.VAD_BOS, "4000");
-
-        // 设置语音后端点:后端点静音检测时间，即用户停止说话多长时间内即认为不再输入， 自动停止录音
-        mIatDialog.setParameter(SpeechConstant.VAD_EOS, "1000");
-
-        // 设置标点符号,设置为"0"返回结果无标点,设置为"1"返回结果有标点
-        mIatDialog.setParameter(SpeechConstant.ASR_PTT, "1");
-
-        // 设置音频保存路径，保存音频格式支持pcm、wav.
-        mIatDialog.setParameter(SpeechConstant.AUDIO_FORMAT, "wav");
-        mIatDialog.setParameter(SpeechConstant.ASR_AUDIO_PATH, getExternalFilesDir("msc").getAbsolutePath() + "/iat.wav");
-    }
-
-    /**
-     * 语音合成参数设置
-     *
-     * @return
-     */
-    private void setSpeechParam() {
-        // 清空参数
-        mTts.setParameter(SpeechConstant.PARAMS, null);
-        // 根据合成引擎设置相应参数
-        if (mEngineType.equals(SpeechConstant.TYPE_CLOUD)) {
-            mTts.setParameter(SpeechConstant.ENGINE_TYPE, SpeechConstant.TYPE_CLOUD);
-            // 支持实时音频返回，仅在 synthesizeToUri 条件下支持
-            mTts.setParameter(SpeechConstant.TTS_DATA_NOTIFY, "1");
-            //	mTts.setParameter(SpeechConstant.TTS_BUFFER_TIME,"1");
-
-            // 设置在线合成发音人
-            mTts.setParameter(SpeechConstant.VOICE_NAME, voicer);
-            //设置合成语速
-            mTts.setParameter(SpeechConstant.SPEED, "50");
-            //设置合成音调
-            mTts.setParameter(SpeechConstant.PITCH, "50");
-            //设置合成音量
-            mTts.setParameter(SpeechConstant.VOLUME, "50");
-        } else {
-            mTts.setParameter(SpeechConstant.ENGINE_TYPE, SpeechConstant.TYPE_LOCAL);
-            mTts.setParameter(SpeechConstant.VOICE_NAME, "");
-
-        }
-
-        //设置播放器音频流类型
-        mTts.setParameter(SpeechConstant.STREAM_TYPE, "3");
-        // 设置播放合成音频打断音乐播放，默认为true
-        mTts.setParameter(SpeechConstant.KEY_REQUEST_FOCUS, "false");
-
-        // 设置音频保存路径，保存音频格式支持pcm、wav，设置路径为sd卡请注意WRITE_EXTERNAL_STORAGE权限
-        mTts.setParameter(SpeechConstant.AUDIO_FORMAT, "pcm");
-        mTts.setParameter(SpeechConstant.TTS_AUDIO_PATH, getExternalFilesDir("msc").getAbsolutePath() + "/tts.pcm");
-    }
 
     private void initWelcomeContent() {
         new Handler().postDelayed(new Runnable() {
@@ -227,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
                         mListAdapter.notifyDataSetChanged();
                         mRvChatList.smoothScrollToPosition(mListAdapter.getItemCount());
 
-                        speechStartSaying(question);
+                        mXFSpeech.speechStartSaying(question, mSynthesizerListener);
 //
 //
 //                        Speech.getInstance().say(question, new TextToSpeechCallback() {
@@ -289,23 +172,8 @@ public class MainActivity extends AppCompatActivity {
         }, 1000);
     }
 
-    private void speechStartSaying(String question) {
-        if (mTts.isSpeaking()) {
-            mTts.stopSpeaking();
-        }
 
-        pcmFile = new File(getExternalCacheDir().getAbsolutePath(), "tts_pcmFile.pcm");
-        pcmFile.delete();
-
-        setSpeechParam();
-
-        int code = mTts.startSpeaking(question, mTtsListener);
-        if (code != ErrorCode.SUCCESS) {
-            Toast.makeText(mContext, "语音合成失败,错误码: " + code, Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private SynthesizerListener mTtsListener = new SynthesizerListener() {
+    private SynthesizerListener mSynthesizerListener = new SynthesizerListener() {
         @Override
         public void onSpeakBegin() {
             mBtnStopSpeech.setVisibility(View.VISIBLE);
@@ -346,16 +214,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
 //        Speech.getInstance().shutdown();
-        if (mIatDialog != null) {
-            // 退出时释放连接
-            mIatDialog.cancel();
-            mIatDialog.destroy();
-        }
-        if (null != mTts) {
-            mTts.stopSpeaking();
-            // 退出时释放连接
-            mTts.destroy();
-        }
+        mXFSpeech.destroy();
     }
 
     private void initAdpater() {
@@ -383,12 +242,10 @@ public class MainActivity extends AppCompatActivity {
             record();
         });
 
-        mIatDialog = new RecognizerDialog(this, mInitListener);
-
         mBtnStopSpeech = findViewById(R.id.btn_icon_stop_speech);
         mBtnStopSpeech.setOnClickListener(v -> {
-            mTts.pauseSpeaking();
-            mTts.stopSpeaking();
+            mXFSpeech.pause();
+            mXFSpeech.stop();
             mBtnStopSpeech.setVisibility(View.GONE);
         });
     }
@@ -414,7 +271,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
 
             // 科大讯飞
-            startRecordByXF();
+            mXFSpeech.startRecordByXF(mRecognizerDialogListener);
 
             // 谷歌自带语音识别
 //            mLlRecord.setVisibility(View.VISIBLE);
@@ -423,26 +280,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * 科大讯飞语音识别
-     */
-    private void startRecordByXF() {
-        if (mIatDialog.isShowing()) {
-            return;
-        }
-        setRecognizerParam();
-
-        // 显示听写对话框
-        mIatDialog.setListener(mRecognizerDialogListener);
-        mIatDialog.show();
-    }
-
-    /**
      * 听写UI监听器
      */
     private RecognizerDialogListener mRecognizerDialogListener = new RecognizerDialogListener() {
         // 返回结果
         public void onResult(RecognizerResult results, boolean isLast) {
-            printResult(results);
+            String result = mXFSpeech.getResult(results);
+            mEtQuestion.setText(result);
+            mEtQuestion.setSelection(mEtQuestion.length());
         }
 
         // 识别回调错误
@@ -451,29 +296,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
     };
-
-    private void printResult(RecognizerResult results) {
-        String text = JsonParser.parseIatResult(results.getResultString());
-        String sn = null;
-        // 读取json结果中的sn字段
-        try {
-            JSONObject resultJson = new JSONObject(results.getResultString());
-            sn = resultJson.optString("sn");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        mIatResults.put(sn, text);
-
-        StringBuffer resultBuffer = new StringBuffer();
-        for (String key : mIatResults.keySet()) {
-            resultBuffer.append(mIatResults.get(key));
-        }
-        mEtQuestion.setText(resultBuffer.toString());
-        mEtQuestion.setSelection(mEtQuestion.length());
-//        mBtnSend.performClick();
-
-    }
 
     /**
      * @deprecated 谷歌的语音组件，需要科技才能用
@@ -544,7 +366,7 @@ public class MainActivity extends AppCompatActivity {
                 mListAdapter.notifyDataSetChanged();
                 mRvChatList.smoothScrollToPosition(mChatMessageData.getSize());
                 if (mChatMessageData.isBot(owner)) {
-                    speechStartSaying(question);
+                    mXFSpeech.speechStartSaying(question, mSynthesizerListener);
                     mJSONMessage.addBotMessage(question); // 记录每次用户的上下文，这样AI就能实现多次对话
 
 //                    Speech.getInstance().say(question, new TextToSpeechCallback() {
