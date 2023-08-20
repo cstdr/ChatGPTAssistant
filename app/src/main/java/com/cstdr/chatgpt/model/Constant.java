@@ -6,7 +6,6 @@ public class Constant {
 
     // 这里需要替换成你自己的Key
     // https://platform.openai.com/account/api-keys
-    public static final String API = OpenAI.API_KEY;
     /**
      * 20230715 服务器维护不可用
      * To use our hosted ChatGPT API, you can use the following steps:
@@ -32,7 +31,7 @@ public class Constant {
 
     public static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
     public static final String AUTHORIZATION = "Authorization";
-    public static final String AUTHORIZATION_API_KEY = "Bearer " + API;
+    public static final String AUTHORIZATION_API_KEY = "Bearer " + API.OPEN_AI;
     public static final String MODEL = "model";
     public static final String MODEL_GPT35 = "gpt-3.5-turbo";
 

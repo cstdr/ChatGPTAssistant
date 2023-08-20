@@ -74,23 +74,35 @@ public class ChatListActivity extends AppCompatActivity {
     private Button mBtnStopSpeech;
 
     // Model层
+
+    /**
+     * 聊天信息数据
+     */
     private IChatMessageData mChatMessageData;
+    /**
+     * JSON类型的上下文聊天数据
+     */
     private IJSONMessage mJSONMessage;
+    /**
+     * 讯飞语音组件
+     */
     private IXFSpeech mXFSpeech;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ClipboardUtil.init();
-
-        mXFSpeech = new XFSpeech(this, mInitListener);
-
-        // ======================
-
-//        Speech.init(this, getPackageName());
 
         mContext = this;
+
+        ClipboardUtil.init();
+
+        // 讯飞语音组件初始化
+        mXFSpeech = new XFSpeech(this, mInitListener);
+
+        // 谷歌官方语音组件，需要科技
+//        Speech.init(this, getPackageName());
+
         mChatMessageData = ChatMessageData.getInstance();
         mJSONMessage = JSONMessage.getInstance();
         initView();

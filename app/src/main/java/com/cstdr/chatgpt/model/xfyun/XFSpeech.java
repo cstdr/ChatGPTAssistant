@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.cstdr.chatgpt.controller.MyApplication;
+import com.cstdr.chatgpt.model.API;
 import com.cstdr.chatgpt.util.JsonParser;
 import com.iflytek.cloud.ErrorCode;
 import com.iflytek.cloud.InitListener;
@@ -52,7 +53,7 @@ public class XFSpeech implements IXFSpeech {
     public XFSpeech(Context context, InitListener mInitListener) {
         // 将“12345678”替换成您申请的APPID，申请地址：http://www.xfyun.cn
         // 请勿在“=”与appid之间添加任何空字符或者转义符
-        SpeechUtility.createUtility(MyApplication.getContext(), SpeechConstant.APPID + "=febcf088");
+        SpeechUtility.createUtility(MyApplication.getContext(), SpeechConstant.APPID + "=" + API.XF_SPEECH);
 
         // 初始化识别无UI识别对象
         // 使用SpeechRecognizer对象，可根据回调消息自定义界面；
