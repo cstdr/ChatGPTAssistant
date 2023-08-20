@@ -133,6 +133,7 @@ public class MainActivity extends AppCompatActivity {
 
         initWelcomeContent();
 
+
     }
 
     /**
@@ -411,6 +412,7 @@ public class MainActivity extends AppCompatActivity {
             if (code != ErrorCode.SUCCESS) {
                 Toast.makeText(mContext, "语音功能初始化失败 " + code, Toast.LENGTH_SHORT).show();
             }
+
         }
     };
 
@@ -528,7 +530,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         mEtQuestion.setText("");
-
         // 发送文字到List里
         addChatMessage(Constant.OWNER_HUMAN, question);
 
@@ -546,7 +547,6 @@ public class MainActivity extends AppCompatActivity {
                 mChatMessageList.add(chatMessage);
                 mListAdapter.notifyDataSetChanged();
                 mRvChatList.smoothScrollToPosition(mListAdapter.getItemCount());
-
                 if (owner.equals(Constant.OWNER_BOT)) {
 
                     speechStartSaying(question);
@@ -591,7 +591,6 @@ public class MainActivity extends AppCompatActivity {
     private void sendQuestionToAPI(String question) {
 
         JSONObject jsonBody = setRequestParam(question);
-
         // Request
         RequestBody requestBody = RequestBody.create(jsonBody.toString(), Constant.JSON);
         Request request = new Request.Builder().url(Constant.OPENAI_URL).header(Constant.AUTHORIZATION, Constant.AUTHORIZATION_API_KEY).post(requestBody).build();
@@ -607,6 +606,7 @@ public class MainActivity extends AppCompatActivity {
 //                String basic = Credentials.basic(Constant.PROXY_USER_NAME, Constant.PROXY_PASSWORD);
 //                return response.request().newBuilder().header("Proxy-Authorization", basic).build();
 //            }
+//
 //        });
 
         client = builder.build();

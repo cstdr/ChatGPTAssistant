@@ -19,6 +19,9 @@ android {
     buildTypes {
         release {
             minifyEnabled false
+
+            // remove unused resources
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -45,5 +48,6 @@ dependencies {
     // Android Speech https://github.com/gotev/android-speech
     implementation 'net.gotev:speech:1.6.2'
 
-
+    // debugImplementation because LeakCanary should only run in debug builds.
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.12'
 }
