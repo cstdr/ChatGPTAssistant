@@ -1,4 +1,4 @@
-package com.cstdr.chatgpt;
+package com.cstdr.chatgpt.controller;
 
 import android.Manifest;
 import android.content.Context;
@@ -20,9 +20,13 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.cstdr.chatgpt.adapter.ChatListAdapter;
-import com.cstdr.chatgpt.bean.ChatMessage;
-import com.cstdr.chatgpt.constant.Constant;
+import com.cstdr.chatgpt.R;
+import com.cstdr.chatgpt.controller.adapter.ChatListAdapter;
+import com.cstdr.chatgpt.model.ChatMessageData;
+import com.cstdr.chatgpt.model.Constant;
+import com.cstdr.chatgpt.model.IChatMessageData;
+import com.cstdr.chatgpt.model.IJSONMessage;
+import com.cstdr.chatgpt.model.JSONMessage;
 import com.cstdr.chatgpt.util.ClipboardUtil;
 import com.cstdr.chatgpt.util.JsonParser;
 import com.iflytek.cloud.ErrorCode;
@@ -48,7 +52,6 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -67,21 +70,21 @@ public class MainActivity extends AppCompatActivity {
 
     private Context mContext;
 
+    // Model层
+    private IChatMessageData mChatMessageData;
+    private IJSONMessage mJSONMessage;
+
     private RecyclerView mRvChatList;
     private EditText mEtQuestion;
     private Button mBtnSend;
     private Button mBtnRecord;
 
-    private List<ChatMessage> mChatMessageList;
     private ChatListAdapter mListAdapter;
 
     public OkHttpClient client;
     private SpeechProgressView mSPVRecord;
     private LinearLayout mLlRecord;
     private Button mBtnStopSpeech;
-
-    private JSONArray mMessagesArray = new JSONArray();
-
 
     // ===============科大讯飞语音转写相关===================
 
@@ -108,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ClipboardUtil.init(this);
+        ClipboardUtil.init();
 
         // 将“12345678”替换成您申请的APPID，申请地址：http://www.xfyun.cn
         // 请勿在“=”与appid之间添加任何空字符或者转义符
@@ -126,14 +129,11 @@ public class MainActivity extends AppCompatActivity {
 //        Speech.init(this, getPackageName());
 
         mContext = this;
-
+        mChatMessageData = ChatMessageData.getInstance();
+        mJSONMessage = JSONMessage.getInstance();
         initView();
-        initChatMessageList();
         initAdpater();
-
         initWelcomeContent();
-
-
     }
 
     /**
@@ -223,11 +223,7 @@ public class MainActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        String owner = Constant.OWNER_BOT;
-                        String question = "欢迎和我聊天，我是蔡特鸡皮踢";
-
-                        ChatMessage chatMessage = new ChatMessage(owner, question);
-                        mChatMessageList.add(chatMessage);
+                        String question = mChatMessageData.addWelcomeMessage();
                         mListAdapter.notifyDataSetChanged();
                         mRvChatList.smoothScrollToPosition(mListAdapter.getItemCount());
 
@@ -362,12 +358,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void initChatMessageList() {
-        mChatMessageList = new ArrayList<ChatMessage>();
-    }
-
     private void initAdpater() {
-        mListAdapter = new ChatListAdapter(mChatMessageList);
+        mListAdapter = new ChatListAdapter();
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mContext);
         // 从底部加入聊天消息
         linearLayoutManager.setStackFromEnd(true);
@@ -388,7 +380,7 @@ public class MainActivity extends AppCompatActivity {
         mSPVRecord = findViewById(R.id.spv_record);
         mBtnRecord = findViewById(R.id.btn_record);
         mBtnRecord.setOnClickListener((v) -> {
-            requestPermissions();
+            record();
         });
 
         mIatDialog = new RecognizerDialog(this, mInitListener);
@@ -416,14 +408,13 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    private void requestPermissions() {
+    private void record() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, 1);
         } else {
 
             // 科大讯飞
             startRecordByXF();
-
 
             // 谷歌自带语音识别
 //            mLlRecord.setVisibility(View.VISIBLE);
@@ -535,31 +526,26 @@ public class MainActivity extends AppCompatActivity {
 
         addChatMessage(Constant.OWNER_BOT_THINK, "正在思考中...");
 
-        // TODO 发送文字到API接口
+        // 发送文字到API接口
         sendQuestionToAPI(question);
     }
 
+    /**
+     * #重要 存储消息，显示消息，播放消息内容，记录上下文
+     *
+     * @param owner
+     * @param question
+     */
     private void addChatMessage(String owner, String question) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                ChatMessage chatMessage = new ChatMessage(owner, question);
-                mChatMessageList.add(chatMessage);
+                mChatMessageData.addChatMessage(owner, question);
                 mListAdapter.notifyDataSetChanged();
-                mRvChatList.smoothScrollToPosition(mListAdapter.getItemCount());
-                if (owner.equals(Constant.OWNER_BOT)) {
-
+                mRvChatList.smoothScrollToPosition(mChatMessageData.getSize());
+                if (mChatMessageData.isBot(owner)) {
                     speechStartSaying(question);
-
-                    // TODO put bot message
-                    JSONObject message = new JSONObject();
-                    try {
-                        message.put(Constant.MESSAGES_KEY_ROLE, Constant.MESSAGES_VALUE_ROLE_ASSISTANT);
-                        message.put(Constant.MESSAGES_KEY_CONTENT, question);
-                    } catch (JSONException e) {
-                        throw new RuntimeException(e);
-                    }
-                    mMessagesArray.put(message);
+                    mJSONMessage.addBotMessage(question); // 记录每次用户的上下文，这样AI就能实现多次对话
 
 //                    Speech.getInstance().say(question, new TextToSpeechCallback() {
 //                        @Override
@@ -580,12 +566,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-    }
-
-    private void removeLastChatMessage() {
-        if (mChatMessageList.size() > 0) {
-            mChatMessageList.remove(mChatMessageList.size() - 1);
-        }
     }
 
     private void sendQuestionToAPI(String question) {
@@ -613,13 +593,13 @@ public class MainActivity extends AppCompatActivity {
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                removeLastChatMessage();
+                mChatMessageData.removeLastChatMessage(); // 删除"思考中"消息
                 addChatMessage(Constant.OWNER_BOT, "出错了，错误信息是：" + e.getMessage());
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                removeLastChatMessage();
+                mChatMessageData.removeLastChatMessage(); // 删除"思考中"消息
 
                 if (response.isSuccessful()) {
                     try {
@@ -633,8 +613,6 @@ public class MainActivity extends AppCompatActivity {
                     } catch (JSONException e) {
                         throw new RuntimeException(e);
                     }
-
-
                 } else {
                     addChatMessage(Constant.OWNER_BOT, "出错了，错误信息是：" + response.body().string());
                 }
@@ -650,19 +628,10 @@ public class MainActivity extends AppCompatActivity {
             jsonBody.put(Constant.MODEL, Constant.MODEL_GPT35);
             jsonBody.put(Constant.TEMPERATURE, Constant.TEMPERATURE_MIDDLE);
 
+            mJSONMessage.removeNotNeededMessage(); // 一次传输Token的长度做限制
+            mJSONMessage.addUserMessage(question); // 记录每次用户的上下文，这样AI就能实现多次对话
 
-            if (mMessagesArray.length() > 8) {
-                mMessagesArray.remove(0);
-            }
-
-            // TODO put user message
-            JSONObject message = new JSONObject();
-            message.put(Constant.MESSAGES_KEY_ROLE, Constant.MESSAGES_VALUE_ROLE_USER);
-            message.put(Constant.MESSAGES_KEY_CONTENT, question);
-
-            mMessagesArray.put(message);
-
-            jsonBody.put(Constant.MESSAGES, mMessagesArray);
+            jsonBody.put(Constant.MESSAGES, mJSONMessage.getArray());
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }

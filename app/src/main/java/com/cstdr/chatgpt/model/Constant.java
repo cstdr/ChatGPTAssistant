@@ -1,4 +1,4 @@
-package com.cstdr.chatgpt.constant;
+package com.cstdr.chatgpt.model;
 
 import okhttp3.MediaType;
 

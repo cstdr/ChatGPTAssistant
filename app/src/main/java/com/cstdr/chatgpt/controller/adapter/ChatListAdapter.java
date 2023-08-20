@@ -1,6 +1,5 @@
-package com.cstdr.chatgpt.adapter;
+package com.cstdr.chatgpt.controller.adapter;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,22 +12,15 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.cstdr.chatgpt.MyApplication;
 import com.cstdr.chatgpt.R;
-import com.cstdr.chatgpt.bean.ChatMessage;
-import com.cstdr.chatgpt.constant.Constant;
+import com.cstdr.chatgpt.model.ChatMessage;
+import com.cstdr.chatgpt.model.ChatMessageData;
+import com.cstdr.chatgpt.model.Constant;
 import com.cstdr.chatgpt.util.ClipboardUtil;
-
-import java.util.List;
-import java.util.zip.Inflater;
 
 public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.MyViewHolder> {
 
-
-    private List<ChatMessage> mChatMessageList;
-
-    public ChatListAdapter(List<ChatMessage> chatMessageList) {
-        mChatMessageList = chatMessageList;
+    public ChatListAdapter() {
     }
 
     @NonNull
@@ -41,7 +33,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.MyView
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-        ChatMessage chatMessage = mChatMessageList.get(position);
+        ChatMessage chatMessage = ChatMessageData.getInstance().getChatMessage(position);
         String msg = chatMessage.getMsg();
         String owner = chatMessage.getOwner();
         if (owner.equals(Constant.OWNER_BOT)) {
@@ -78,11 +70,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.MyView
 
     @Override
     public int getItemCount() {
-        if (mChatMessageList != null) {
-            int size = mChatMessageList.size();
-            return size;
-        }
-        return 0;
+        return ChatMessageData.getInstance().getSize();
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {

@@ -1,4 +1,4 @@
-package com.cstdr.chatgpt.bean;
+package com.cstdr.chatgpt.model;
 
 public class ChatMessage {
 
